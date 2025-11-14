@@ -1,1 +1,318 @@
-(function () {    // -------- Helpers --------    // Parse app.name to extract base name and any channel keywords (Beta/Prerelease)    function getAppChannelInfo() {        // Examples of app.name:        // "Adobe Illustrator 2026"        // "Adobe Illustrator 2026 Prerelease"        // "Adobe Illustrator 2026 Beta"        var name = app.name || "";        var lower = name.toLowerCase();        var isBeta = lower.indexOf("beta") > -1;        var isPrerelease = (!isBeta) && (lower.indexOf("pre") > -1 || lower.indexOf("prerelease") > -1);        // Base product label (keep official casing)        // We'll normalize to "Adobe Illustrator" for folder name generation        var baseLabel = "Adobe Illustrator";        return { isBeta: isBeta, isPrerelease: isPrerelease, baseLabel: baseLabel };    }    // Extract version parts (e.g., "30.1.36" -> {major:"30", minor:"1", patch:"36", majorMinor:"30.1", full:"30.1.36"})    function getVersionParts() {        var v = app.version;        var parts = v.split(".");        var result = {            major: parts.length > 0 ? parts[0] : "0",            minor: parts.length > 1 ? parts[1] : "0",            patch: parts.length > 2 ? parts[2] : "0",            majorMinor: "",            full: ""        };        result.majorMinor = result.major + "." + result.minor;        result.full = result.major + "." + result.minor + "." + result.patch;        return result;    }    function getMajorVersion() {        var v = app.version, major = 0;        for (var i = 0; i < v.length; i++) {            var ch = v.charAt(i);            if (ch == ".") break;            var c = ch.charCodeAt(0);            if (c >= 48 && c <= 57) major = (major * 10) + (c - 48);        }        return major;    }    // Try multiple candidate preference folder names and locales (regular, Beta/Prerelease, and Windows x64)    // Rule: Use only first two version numbers (major.minor), optionally with or without "Beta" or "Prerelease" before "Settings".    // Examples:    // - "Adobe Illustrator 30.1 Settings"    // - "Adobe Illustrator 30.1 Beta Settings"    // - "Adobe Illustrator 30.1 Prerelease Settings"    // Also include some safe fallbacks.    function resolvePrefsFolder() {        var isMac = (File.fs == "Macintosh");        var isWin = (File.fs == "Windows");        var ver = getVersionParts();        var majorOnly = getMajorVersion();        var appInfo = getAppChannelInfo();        var locale = app.locale ? app.locale : "en_US";        var baseLabel = appInfo.baseLabel;        var twoPart = ver.major + "." + ver.minor;        // Build name variants prioritizing 2-part versions with channel aligned to running app        var nameVariants = [];        // Channel-aware top candidates (two-part)        if (appInfo.isBeta) {            nameVariants.push(baseLabel + " " + twoPart + " Beta Settings");        }        if (appInfo.isPrerelease) {            nameVariants.push(baseLabel + " " + twoPart + " Prerelease Settings");        }        // Non-channel (stable)        nameVariants.push(baseLabel + " " + twoPart + " Settings");        // Accept either channel regardless of running build, in case naming differs on disk        nameVariants.push(baseLabel + " " + twoPart + " Beta Settings");        nameVariants.push(baseLabel + " " + twoPart + " Prerelease Settings");        // A few pragmatic fallbacks (full and major-only, with/without channel)        var full = ver.full;        nameVariants.push(baseLabel + " " + full + " Settings");        nameVariants.push(baseLabel + " " + full + " Beta Settings");        nameVariants.push(baseLabel + " " + full + " Prerelease Settings");        nameVariants.push(baseLabel + " " + ver.majorMinor + " Settings");        nameVariants.push(baseLabel + " " + ver.majorMinor + " Beta Settings");        nameVariants.push(baseLabel + " " + ver.majorMinor + " Prerelease Settings");        nameVariants.push(baseLabel + " " + majorOnly + " Settings");        nameVariants.push(baseLabel + " " + majorOnly + " Beta Settings");        nameVariants.push(baseLabel + " " + majorOnly + " Prerelease Settings");        // Remove duplicates manually (ExtendScript has no Set)        var dedup = [];        for (var di = 0; di < nameVariants.length; di++) {            var cand = nameVariants[di];            var exists = false;            for (var dj = 0; dj < dedup.length; dj++) {                if (dedup[dj] === cand) { exists = true; break; }            }            if (!exists) dedup.push(cand);        }        nameVariants = dedup;        function tryLocales(baseFolder) {            var locs = [locale, "en_US", "en_GB"];            for (var i = 0; i < locs.length; i++) {                var locF = new Folder(baseFolder.fsName + "/" + locs[i] + "/");                if (locF.exists) return locF;            }            if (baseFolder.exists) return baseFolder;            return null;        }        if (isMac) {            var home = Folder("~").fsName;            var prefRoot = new Folder(home + "/Library/Preferences");            for (var i = 0; i < nameVariants.length; i++) {                var candidate = new Folder(prefRoot.fsName + "/" + nameVariants[i]);                var hit = tryLocales(candidate);                if (hit) return hit;            }        } else if (isWin) {            var appdata = $.getenv("APPDATA");            var base = appdata && appdata.length > 0 ? appdata : Folder.userData.parent.fsName; // Roaming            var adobeRoot = new Folder(base + "\\Adobe");            for (var i2 = 0; i2 < nameVariants.length; i2++) {                var cand2 = new Folder(adobeRoot.fsName + "\\" + nameVariants[i2]);                var hit2 = tryLocales(cand2);                if (hit2) {                    // Prefer locale root; x64 subfolder may exist under it                    return hit2;                }            }        }        return null;    }    function getGenAIFolder(baseFolder, targetName) {        var directFolder = new Folder(baseFolder.fsName + "/" + targetName);        var x64Folder = new Folder(baseFolder.fsName + "/x64/" + targetName);        if (directFolder.exists) {            return directFolder;        } else if (x64Folder.exists) {            return x64Folder;        } else {            return directFolder;        }    }    function getFolderStats(fld) {        var total = 0, subCount = 0, fileCount = 0;        if (!fld || !fld.exists) return { bytes:0, subCount:0, fileCount:0 };        var stack = [fld];        while (stack.length > 0) {            var cur = stack.pop();            var items = cur.getFiles();            for (var i = 0; i < items.length; i++) {                var it = items[i];                if (it instanceof Folder) { subCount++; stack.push(it); }                else if (it instanceof File) { try { if (it.exists) { total += it.length; fileCount++; } } catch(e){} }            }        }        return { bytes: total, subCount: subCount, fileCount: fileCount };    }    function formatSize(bytes) {        var mb = bytes / (1024*1024);        if (mb <= 0) return "0 MB";        var r = Math.round(mb*10)/10;        if (r < 0.1) r = 0.1;        return r + " MB";    }    // Recursive delete that attempts to remove all children before removing the folder itself    function deleteFolderRecursive(fld) {        var result = { ok: true, deletedFiles: 0, deletedFolders: 0, errors: [] };        if (!fld || !fld.exists) return result;        try {            var items = fld.getFiles();            for (var i = 0; i < items.length; i++) {                var it = items[i];                try {                    if (it instanceof Folder) {                        var sub = deleteFolderRecursive(it);                        result.ok = result.ok && sub.ok;                        result.deletedFiles += sub.deletedFiles;                        result.deletedFolders += sub.deletedFolders;                        if (sub.errors.length > 0) {                            for (var e = 0; e < sub.errors.length; e++) result.errors.push(sub.errors[e]);                        }                        if (it.exists) {                            if (!it.remove()) {                                result.ok = false;                                result.errors.push("Failed to remove folder: " + it.fsName);                            } else {                                result.deletedFolders++;                            }                        }                    } else if (it instanceof File) {                        if (it.exists) {                            if (!it.remove()) {                                result.ok = false;                                result.errors.push("Failed to remove file: " + it.fsName);                            } else {                                result.deletedFiles++;                            }                        }                    }                } catch (remErr) {                    result.ok = false;                    result.errors.push("Error removing: " + it.fsName + " (" + remErr + ")");                }            }            if (fld.exists) {                if (!fld.remove()) {                    result.ok = false;                    result.errors.push("Failed to remove folder: " + fld.fsName);                } else {                    result.deletedFolders++;                }            }        } catch (e) {            result.ok = false;            result.errors.push("Error traversing: " + fld.fsName + " (" + e + ")");        }        return result;    }    // -------- Data --------    var prefs = resolvePrefsFolder();    if (!prefs) { alert("Could not locate the Illustrator Preferences folder using 2-part version naming (with/without Beta/Prerelease)."); return; }    var targetNames = ["GenAIImageToCaption","GenAITextToVectors", "GenAIRotateVector", "GenAIRecolor", "GenAIPatterns", "GenAIMultiDiffusion"];    var entries = [];    for (var i = 0; i < targetNames.length; i++) {        var f = getGenAIFolder(prefs, targetNames[i]);        entries.push({ name: targetNames[i], folder: f, present: f.exists, stats: {bytes:0, subCount:0, fileCount:0}, bullet: null, label: null, checkbox: null });    }    // -------- UI --------    var dlg = new Window("dialog", "GenAI Cache Cleaner 1.2");    dlg.orientation = "column"; dlg.alignChildren = ["fill","top"]; dlg.margins = 24; dlg.spacing = 12;    var header = dlg.add("statictext", undefined, "Preferences base: " + prefs.fsName, {multiline:true});    header.alignment = "fill";    var listHeader = dlg.add("group"); listHeader.orientation = "row"; listHeader.alignChildren = ["left","center"];    var selHint = listHeader.add("statictext", undefined, "Click names to open. Check to delete.");    selHint.characters = 48;    var listGroup = dlg.add("group"); listGroup.orientation = "column"; listGroup.alignChildren = ["fill","top"]; listGroup.spacing = 6;    var r;    for (r = 0; r < entries.length; r++) {        var row = listGroup.add("group"); row.orientation = "row"; row.alignChildren = ["left","center"]; row.spacing = 10;        var cb = row.add("checkbox", undefined, "");        var bullet = row.add("statictext", undefined, "\u25CF"); bullet.characters = 1;        var label = row.add("statictext", undefined, ""); label.characters = 56;        entries[r].checkbox = cb; entries[r].bullet = bullet; entries[r].label = label;        (function(ent){            label.addEventListener("click", function(){                try {                    var toOpen = ent.folder.exists ? ent.folder : prefs;                    toOpen.execute();                } catch(e){}            });        })(entries[r]);    }    var totalText = dlg.add("statictext", undefined, "", {multiline:true});    totalText.alignment = "fill";    var footer = dlg.add("group"); footer.orientation = "row"; footer.alignChildren = ["right","center"]; footer.spacing = 10;    var deleteBtn = footer.add("button", undefined, "Delete Selected");    deleteBtn.preferredSize = [140,32];    var openPrefsBtn = footer.add("button", undefined, "Open Prefs");    openPrefsBtn.preferredSize = [120,32];    var closeBtn = footer.add("button", undefined, "Close");    closeBtn.preferredSize = [100,32];    // -------- Render --------    function refresh() {        var grandTotal = 0;        for (var i = 0; i < entries.length; i++) {            var e = entries[i];            e.present = e.folder.exists;            e.stats = getFolderStats(e.present ? e.folder : null);            grandTotal += e.stats.bytes;            var line = e.name + " (" + e.stats.subCount + ") " + formatSize(e.stats.bytes);            e.label.text = line;            var dim = (!e.present || (e.stats.subCount === 0 && e.stats.fileCount === 0 && e.stats.bytes === 0));            e.label.enabled = !dim;            try { e.bullet.enabled = !dim; } catch(err){}            e.checkbox.enabled = e.present;            if (!e.present) e.checkbox.value = false;        }        totalText.text = "Total size across all GenAI folders: " + formatSize(grandTotal);    }    refresh();    // -------- Events --------    openPrefsBtn.onClick = function(){ try { prefs.execute(); } catch(e) {} };    deleteBtn.onClick = function() {        var targets = [];        for (var i = 0; i < entries.length; i++) {            var e = entries[i];            if (e.checkbox.value && e.folder.exists) targets.push(e);        }        if (targets.length === 0) {            alert("No folders selected or they do not exist.");            return;        }        var sumLines = [];        var i2, e2, line;        for (i2 = 0; i2 < targets.length; i2++) {            e2 = targets[i2];            line = "- " + e2.name + " (" + e2.stats.subCount + " items) " + formatSize(e2.stats.bytes);            sumLines.push(line);        }        var msg = "Warning: This will permanently delete the selected folders and their contents.\n\n" +                  "Folders to delete:\n" + sumLines.join("\n") + "\n\n" +                  "Are you sure you want to continue?";        if (!confirm(msg)) return;        var report = [];        for (var k = 0; k < targets.length; k++) {            var tgt = targets[k];            var name = tgt.name;            var res;            try {                res = deleteFolderRecursive(tgt.folder);            } catch (ex) {                res = { ok:false, deletedFiles:0, deletedFolders:0, errors:["Unexpected error: " + ex] };            }            var status = res.ok ? "OK" : "FAILED";            var rep = name + ": " + status + " — deleted files: " + res.deletedFiles + ", deleted folders: " + res.deletedFolders;            report.push(rep);            if (!res.ok && res.errors.length > 0) {                var j;                for (j = 0; j < res.errors.length; j++) {                    report.push("  • " + res.errors[j]);                }            }        }        alert("Deletion completed.\n\n" + report.join("\n"));        refresh();    };    closeBtn.onClick = function(){ dlg.close(); };    dlg.center(); dlg.show();})();
+(function () {
+    // -------- Helpers --------
+    // Parse app.name to extract base name and any channel keywords (Beta/Prerelease)
+    function getAppChannelInfo() {
+        // Examples of app.name:
+        // "Adobe Illustrator 2026"
+        // "Adobe Illustrator 2026 Prerelease"
+        // "Adobe Illustrator 2026 Beta"
+        var name = app.name || "";
+        var lower = name.toLowerCase();
+        var isBeta = lower.indexOf("beta") > -1;
+        var isPrerelease = (!isBeta) && (lower.indexOf("pre") > -1 || lower.indexOf("prerelease") > -1);
+        // Base product label (keep official casing)
+        // We'll normalize to "Adobe Illustrator" for folder name generation
+        var baseLabel = "Adobe Illustrator";
+        return { isBeta: isBeta, isPrerelease: isPrerelease, baseLabel: baseLabel };
+    }
+    // Extract version parts (e.g., "30.1.36" -> {major:"30", minor:"1", patch:"36", majorMinor:"30.1", full:"30.1.36"})
+    function getVersionParts() {
+        var v = app.version;
+        var parts = v.split(".");
+        var result = {
+            major: parts.length > 0 ? parts[0] : "0",
+            minor: parts.length > 1 ? parts[1] : "0",
+            patch: parts.length > 2 ? parts[2] : "0",
+            majorMinor: "",
+            full: ""
+        };
+        result.majorMinor = result.major + "." + result.minor;
+        result.full = result.major + "." + result.minor + "." + result.patch;
+        return result;
+    }
+    function getMajorVersion() {
+        var v = app.version, major = 0;
+        for (var i = 0; i < v.length; i++) {
+            var ch = v.charAt(i);
+            if (ch == ".") break;
+            var c = ch.charCodeAt(0);
+            if (c >= 48 && c <= 57) major = (major * 10) + (c - 48);
+        }
+        return major;
+    }
+    // Try multiple candidate preference folder names and locales (regular, Beta/Prerelease, and Windows x64)
+    // Rule: Use only first two version numbers (major.minor), optionally with or without "Beta" or "Prerelease" before "Settings".
+    // Examples:
+    // - "Adobe Illustrator 30.1 Settings"
+    // - "Adobe Illustrator 30.1 Beta Settings"
+    // - "Adobe Illustrator 30.1 Prerelease Settings"
+    // Also include some safe fallbacks.
+    function resolvePrefsFolder() {
+        var isMac = (File.fs == "Macintosh");
+        var isWin = (File.fs == "Windows");
+        var ver = getVersionParts();
+        var majorOnly = getMajorVersion();
+        var appInfo = getAppChannelInfo();
+        var locale = app.locale ? app.locale : "en_US";
+        var baseLabel = appInfo.baseLabel;
+        var twoPart = ver.major + "." + ver.minor;
+        // Build name variants prioritizing 2-part versions with channel aligned to running app
+        var nameVariants = [];
+        // Channel-aware top candidates (two-part)
+        if (appInfo.isBeta) {
+            nameVariants.push(baseLabel + " " + twoPart + " Beta Settings");
+        }
+        if (appInfo.isPrerelease) {
+            nameVariants.push(baseLabel + " " + twoPart + " Prerelease Settings");
+        }
+        // Non-channel (stable)
+        nameVariants.push(baseLabel + " " + twoPart + " Settings");
+        // Accept either channel regardless of running build, in case naming differs on disk
+        nameVariants.push(baseLabel + " " + twoPart + " Beta Settings");
+        nameVariants.push(baseLabel + " " + twoPart + " Prerelease Settings");
+        // A few pragmatic fallbacks (full and major-only, with/without channel)
+        var full = ver.full;
+        nameVariants.push(baseLabel + " " + full + " Settings");
+        nameVariants.push(baseLabel + " " + full + " Beta Settings");
+        nameVariants.push(baseLabel + " " + full + " Prerelease Settings");
+        nameVariants.push(baseLabel + " " + ver.majorMinor + " Settings");
+        nameVariants.push(baseLabel + " " + ver.majorMinor + " Beta Settings");
+        nameVariants.push(baseLabel + " " + ver.majorMinor + " Prerelease Settings");
+        nameVariants.push(baseLabel + " " + majorOnly + " Settings");
+        nameVariants.push(baseLabel + " " + majorOnly + " Beta Settings");
+        nameVariants.push(baseLabel + " " + majorOnly + " Prerelease Settings");
+        // Remove duplicates manually (ExtendScript has no Set)
+        var dedup = [];
+        for (var di = 0; di < nameVariants.length; di++) {
+            var cand = nameVariants[di];
+            var exists = false;
+            for (var dj = 0; dj < dedup.length; dj++) {
+                if (dedup[dj] === cand) { exists = true; break; }
+            }
+            if (!exists) dedup.push(cand);
+        }
+        nameVariants = dedup;
+        function tryLocales(baseFolder) {
+            var locs = [locale, "en_US", "en_GB"];
+            for (var i = 0; i < locs.length; i++) {
+                var locF = new Folder(baseFolder.fsName + "/" + locs[i] + "/");
+                if (locF.exists) return locF;
+            }
+            if (baseFolder.exists) return baseFolder;
+            return null;
+        }
+        if (isMac) {
+            var home = Folder("~").fsName;
+            var prefRoot = new Folder(home + "/Library/Preferences");
+            for (var i = 0; i < nameVariants.length; i++) {
+                var candidate = new Folder(prefRoot.fsName + "/" + nameVariants[i]);
+                var hit = tryLocales(candidate);
+                if (hit) return hit;
+            }
+        } else if (isWin) {
+            var appdata = $.getenv("APPDATA");
+            var base = appdata && appdata.length > 0 ? appdata : Folder.userData.parent.fsName; // Roaming
+            var adobeRoot = new Folder(base + "\\Adobe");
+            for (var i2 = 0; i2 < nameVariants.length; i2++) {
+                var cand2 = new Folder(adobeRoot.fsName + "\\" + nameVariants[i2]);
+                var hit2 = tryLocales(cand2);
+                if (hit2) {
+                    // Prefer locale root; x64 subfolder may exist under it
+                    return hit2;
+                }
+            }
+        }
+        return null;
+    }
+    function getGenAIFolder(baseFolder, targetName) {
+        var directFolder = new Folder(baseFolder.fsName + "/" + targetName);
+        var x64Folder = new Folder(baseFolder.fsName + "/x64/" + targetName);
+        if (directFolder.exists) {
+            return directFolder;
+        } else if (x64Folder.exists) {
+            return x64Folder;
+        } else {
+            return directFolder;
+        }
+    }
+    function getFolderStats(fld) {
+        var total = 0, subCount = 0, fileCount = 0;
+        if (!fld || !fld.exists) return { bytes:0, subCount:0, fileCount:0 };
+        var stack = [fld];
+        while (stack.length > 0) {
+            var cur = stack.pop();
+            var items = cur.getFiles();
+            for (var i = 0; i < items.length; i++) {
+                var it = items[i];
+                if (it instanceof Folder) { subCount++; stack.push(it); }
+                else if (it instanceof File) { try { if (it.exists) { total += it.length; fileCount++; } } catch(e){} }
+            }
+        }
+        return { bytes: total, subCount: subCount, fileCount: fileCount };
+    }
+    function formatSize(bytes) {
+        var mb = bytes / (1024*1024);
+        if (mb <= 0) return "0 MB";
+        var r = Math.round(mb*10)/10;
+        if (r < 0.1) r = 0.1;
+        return r + " MB";
+    }
+    // Recursive delete that attempts to remove all children before removing the folder itself
+    function deleteFolderRecursive(fld) {
+        var result = { ok: true, deletedFiles: 0, deletedFolders: 0, errors: [] };
+        if (!fld || !fld.exists) return result;
+        try {
+            var items = fld.getFiles();
+            for (var i = 0; i < items.length; i++) {
+                var it = items[i];
+                try {
+                    if (it instanceof Folder) {
+                        var sub = deleteFolderRecursive(it);
+                        result.ok = result.ok && sub.ok;
+                        result.deletedFiles += sub.deletedFiles;
+                        result.deletedFolders += sub.deletedFolders;
+                        if (sub.errors.length > 0) {
+                            for (var e = 0; e < sub.errors.length; e++) result.errors.push(sub.errors[e]);
+                        }
+                        // Folder already removed by recursive call, no need to remove again
+                    } else if (it instanceof File) {
+                        if (it.exists) {
+                            if (!it.remove()) {
+                                result.ok = false;
+                                result.errors.push("Failed to remove file: " + it.fsName);
+                            } else {
+                                result.deletedFiles++;
+                            }
+                        }
+                    }
+                } catch (remErr) {
+                    result.ok = false;
+                    result.errors.push("Error removing: " + it.fsName + " (" + remErr + ")");
+                }
+            }
+            if (fld.exists) {
+                if (!fld.remove()) {
+                    result.ok = false;
+                    result.errors.push("Failed to remove folder: " + fld.fsName);
+                } else {
+                    result.deletedFolders++;
+                }
+            }
+        } catch (e) {
+            result.ok = false;
+            result.errors.push("Error traversing: " + fld.fsName + " (" + e + ")");
+        }
+        return result;
+    }
+    // -------- Data --------
+    var prefs = resolvePrefsFolder();
+    if (!prefs) { alert("Could not locate the Illustrator Preferences folder using 2-part version naming (with/without Beta/Prerelease)."); return; }
+    var targetNames = ["GenAIImageToCaption","GenAITextToVectors", "GenAIRotateVector", "GenAIRecolor", "GenAIPatterns", "GenAIMultiDiffusion"];
+    var entries = [];
+    for (var i = 0; i < targetNames.length; i++) {
+        var f = getGenAIFolder(prefs, targetNames[i]);
+        entries.push({ name: targetNames[i], folder: f, present: f.exists, stats: {bytes:0, subCount:0, fileCount:0}, bullet: null, label: null, checkbox: null });
+    }
+    // -------- UI --------
+    var ver = getVersionParts();
+    var dlg = new Window("dialog", "GenAI Cache Cleaner 1.2 - Illustrator " + ver.majorMinor);
+    dlg.orientation = "column"; dlg.alignChildren = ["fill","top"]; dlg.margins = 24; dlg.spacing = 12;
+    var header = dlg.add("statictext", undefined, "Preferences base: " + prefs.fsName, {multiline:true});
+    header.alignment = "fill";
+    var listHeader = dlg.add("group"); listHeader.orientation = "row"; listHeader.alignChildren = ["left","center"];
+    var selHint = listHeader.add("statictext", undefined, "Click names to open. Check to delete.");
+    selHint.characters = 48;
+    var listGroup = dlg.add("group"); listGroup.orientation = "column"; listGroup.alignChildren = ["fill","top"]; listGroup.spacing = 6;
+    var r;
+    for (r = 0; r < entries.length; r++) {
+        var row = listGroup.add("group"); row.orientation = "row"; row.alignChildren = ["left","center"]; row.spacing = 10;
+        var cb = row.add("checkbox", undefined, "");
+        var bullet = row.add("statictext", undefined, "\u25CF"); bullet.characters = 1;
+        var label = row.add("statictext", undefined, ""); label.characters = 56;
+        entries[r].checkbox = cb; entries[r].bullet = bullet; entries[r].label = label;
+        (function(ent){
+            label.addEventListener("click", function(){
+                try {
+                    var toOpen = ent.folder.exists ? ent.folder : prefs;
+                    toOpen.execute();
+                } catch(e){}
+            });
+        })(entries[r]);
+    }
+    var totalText = dlg.add("statictext", undefined, "", {multiline:true});
+    totalText.alignment = "fill";
+    var footer = dlg.add("group"); footer.orientation = "row"; footer.alignChildren = ["right","center"]; footer.spacing = 10;
+    var deleteBtn = footer.add("button", undefined, "Delete Selected");
+    deleteBtn.preferredSize = [140,32];
+    var openPrefsBtn = footer.add("button", undefined, "Open Prefs");
+    openPrefsBtn.preferredSize = [120,32];
+    var closeBtn = footer.add("button", undefined, "Close");
+    closeBtn.preferredSize = [100,32];
+    // -------- Render --------
+    function refresh() {
+        var grandTotal = 0;
+        for (var i = 0; i < entries.length; i++) {
+            var e = entries[i];
+            e.present = e.folder.exists;
+            e.stats = getFolderStats(e.present ? e.folder : null);
+            grandTotal += e.stats.bytes;
+            var line = e.name + " (" + e.stats.subCount + ") " + formatSize(e.stats.bytes);
+            e.label.text = line;
+            var dim = (!e.present || (e.stats.subCount === 0 && e.stats.fileCount === 0 && e.stats.bytes === 0));
+            e.label.enabled = !dim;
+            try { e.bullet.enabled = !dim; } catch(err){}
+            e.checkbox.enabled = e.present;
+            if (!e.present) e.checkbox.value = false;
+        }
+        totalText.text = "Total size across all GenAI folders: " + formatSize(grandTotal);
+    }
+    refresh();
+    // -------- Events --------
+    openPrefsBtn.onClick = function(){ try { prefs.execute(); } catch(e) {} };
+    deleteBtn.onClick = function() {
+        var targets = [];
+        for (var i = 0; i < entries.length; i++) {
+            var e = entries[i];
+            if (e.checkbox.value && e.folder.exists) targets.push(e);
+        }
+        if (targets.length === 0) {
+            alert("No folders selected or they do not exist.");
+            return;
+        }
+        var sumLines = [];
+        var i2, e2, line;
+        for (i2 = 0; i2 < targets.length; i2++) {
+            e2 = targets[i2];
+            line = "- " + e2.name + " (" + e2.stats.subCount + " items) " + formatSize(e2.stats.bytes);
+            sumLines.push(line);
+        }
+        var msg = "Warning: This will permanently delete the selected folders and their contents.\n\n" +
+                  "Folders to delete:\n" + sumLines.join("\n") + "\n\n" +
+                  "Are you sure you want to continue?";
+        if (!confirm(msg)) return;
+        var report = [];
+        for (var k = 0; k < targets.length; k++) {
+            var tgt = targets[k];
+            var name = tgt.name;
+            var res;
+            try {
+                res = deleteFolderRecursive(tgt.folder);
+            } catch (ex) {
+                res = { ok:false, deletedFiles:0, deletedFolders:0, errors:["Unexpected error: " + ex] };
+            }
+            var status = res.ok ? "OK" : "FAILED";
+            var rep = name + ": " + status + " — deleted files: " + res.deletedFiles + ", deleted folders: " + res.deletedFolders;
+            report.push(rep);
+            if (!res.ok && res.errors.length > 0) {
+                var j;
+                for (j = 0; j < res.errors.length; j++) {
+                    report.push("  • " + res.errors[j]);
+                }
+            }
+        }
+        alert("Deletion completed.\n\n" + report.join("\n"));
+        refresh();
+    };
+    closeBtn.onClick = function(){ dlg.close(); };
+    dlg.center(); dlg.show();
+})();
