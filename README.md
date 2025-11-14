@@ -64,7 +64,7 @@ The script manages cache folders for the following Adobe Illustrator Generative 
    - Select the `GenAI Cache Cleaner 1.2.jsx` file
 
 ### Using the Interface
-
+![GenAI Cache Cleaner UI](genAI.png).
 The script will open a dialog window displaying:
 
 1. **Preferences Path**: Shows the location of your Illustrator preferences folder
