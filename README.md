@@ -86,7 +86,7 @@ The script will open a dialog window displaying:
 2. **Select**: Check the boxes next to folders you want to delete
 3. **Confirm**: Click "Delete Selected"
 4. **Verify**: Review the confirmation dialog showing what will be deleted
-5. **Execute**: Confirm to proceed with deletion
+5. **Executez**: Confirm to proceed with deletion
 6. **Results**: View the deletion report showing files and folders removed
 
 ## Understanding the Display
@@ -130,49 +130,15 @@ The script implements recursive deletion with error handling:
 
 ## Troubleshooting
 
-### "Could not locate the Illustrator Preferences folder"
-
-**Possible causes:**
-- Unsupported Illustrator version (pre-2024)
-- Non-standard installation directory
-- Preferences folder has been moved or deleted
-
-**Solutions:**
-- Verify you're running Illustrator 2024 or later
-- Click "Open Prefs" button to manually verify the location
-- Reinstall Illustrator if preferences are missing
-
-### Deletion Fails or Shows Errors
-
-**Possible causes:**
-- Insufficient permissions
-- Files in use by another process
-- Locked or read-only files
-
-**Solutions:**
-- Close all Illustrator instances before running the script
-- Run Illustrator with administrator/elevated privileges
-- Check file permissions on the preferences folder
-- Restart your computer and try again
-
 ### Cache Folders Reappear
 
 This is normal behavior. Illustrator recreates cache folders as you use GenAI features. Run the cleaner periodically to manage disk space.
-
-## Best Practices
-
-- **Regular Maintenance**: Run the cleaner monthly if you use GenAI features frequently
-- **Before Major Updates**: Clean cache before updating Illustrator
-- **Low Disk Space**: Use when running low on storage
-- **Backup First**: While safe, consider backing up preferences if customized
-- **Close Illustrator**: For best results, close Illustrator before deletion (though not strictly required)
 
 ## Technical Details
 
 ### File Format
 - **Language**: ExtendScript (Adobe's extended JavaScript)
 - **Compatibility**: Illustrator CC 2024 and later
-- **UI Framework**: ScriptUI (Adobe's dialog system)
 
 ### Cache Folder Locations
 
@@ -186,15 +152,13 @@ This is normal behavior. Illustrator recreates cache folders as you use GenAI fe
 %APPDATA%\Adobe\Adobe Illustrator [version] Settings\[locale]\GenAI*\
 ```
 
-Note: Windows may also include `x64` subdirectories, which the script handles automatically.
-
 ## FAQ
 
 **Q: Will this delete my Illustrator settings or preferences?**
 A: No, it only deletes GenAI cache folders. Your artboards, swatches, brushes, and other preferences remain untouched.
 
 **Q: Do I need to restart Illustrator after cleaning?**
-A: No, but if Illustrator is running, it may recreate some cache files immediately.
+A: No.
 
 **Q: How much space can I expect to free up?**
 A: Varies by usage. Heavy GenAI users may free 500MB-2GB or more.
@@ -203,10 +167,7 @@ A: Varies by usage. Heavy GenAI users may free 500MB-2GB or more.
 A: Yes, run the script from each version to clean its specific caches.
 
 **Q: Is it safe to delete all cache folders?**
-A: Yes, these are temporary cache files. Illustrator will regenerate them as needed.
-
-**Q: Will I lose my GenAI history or recent generations?**
-A: You may lose quick access to recently generated content, but your saved artwork remains intact.
+A: Yes, these are temporary cache files.
 
 ## Version History
 
@@ -214,7 +175,6 @@ A: You may lose quick access to recently generated content, but your saved artwo
 - Enhanced version detection using major.minor format
 - Improved support for Beta and Prerelease channels
 - Better cross-platform folder detection
-- Added support for x64 subdirectories on Windows
 - Optimized UI with clickable folder names
 - Improved error handling and reporting
 
@@ -228,14 +188,6 @@ A: You may lose quick access to recently generated content, but your saved artwo
 - Basic cache detection and deletion
 - Simple UI interface
 
-## Contributing
-
-Contributions are welcome! If you encounter issues or have suggestions:
-
-1. Check existing issues on GitHub
-2. Open a new issue with detailed information
-3. Submit pull requests for improvements
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -243,6 +195,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Author
 
 Created by [jctremblay65](https://github.com/jctremblay65)
+Jean-Claude Tremblay - Services Proficiografik
 
 ## Acknowledgments
 
