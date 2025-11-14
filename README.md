@@ -1,6 +1,6 @@
 # GenAI Cache Cleaner for Adobe Illustrator
 
-A powerful utility script for Adobe Illustrator that helps you manage and clean up GenAI cache folders, freeing up valuable disk space.
+An utility script for Adobe Illustrator that helps you manage and clean up GenAI cache folders, freeing up valuable disk space.
 
 ## Overview
 
@@ -26,13 +26,12 @@ The script manages cache folders for the following Adobe Illustrator Generative 
 - **GenAIRotateVector**: Vector rotation AI cache
 - **GenAIRecolor**: AI-powered recoloring cache
 - **GenAIPatterns**: Pattern generation cache
-- **GenAIMultiDiffusion**: Multi-diffusion model cache
+- **GenAIMultiDiffusion**: Multi-diffusion model cache (Generative Expand)
 
 ## System Requirements
 
 - **Adobe Illustrator**: Version 2024 or later (any version with GenAI features)
 - **Operating System**: macOS or Windows
-- **Channels Supported**: Stable, Beta, and Prerelease builds
 - **Permissions**: Write access to Illustrator preferences folder
 
 ## Installation
@@ -188,19 +187,10 @@ A: Yes, these are temporary cache files.
 - Basic cache detection and deletion
 - Simple UI interface
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## Author
 
 Created by [jctremblay65](https://github.com/jctremblay65)
 Jean-Claude Tremblay - Services Proficiografik
-
-## Acknowledgments
-
-- Adobe Illustrator team for creating the GenAI features
-- ExtendScript community for documentation and support
 
 ## Disclaimer
 
