@@ -11,6 +11,7 @@ GenAI Cache Cleaner is an ExtendScript utility for Adobe Illustrator that automa
 - **Automatic Detection**: Automatically locates your Illustrator preferences folder across different versions, channels (Stable/Beta/Prerelease), and platforms (macOS/Windows)
 - **Visual Overview**: Displays all GenAI cache folders with their sizes and item counts at a glance
 - **Selective Deletion**: Choose which cache folders to delete with checkbox selection
+- **Check All Folders**: Quickly select or deselect all cache folders with a single checkbox
 - **Safety First**: Provides detailed confirmation dialogs before any deletion occurs
 - **Cross-Platform**: Works seamlessly on both macOS and Windows
 - **Version Aware**: Automatically detects Illustrator version and adjusts folder paths accordingly
@@ -38,14 +39,14 @@ The script manages cache folders for the following Adobe Illustrator Generative 
 
 ### Method 1: Direct Installation
 
-1. Download the `GenAI Cache Cleaner 1.2.jsx` file from this repository
+1. Download the `GenAI Cache Cleaner 1.3.jsx` file from this repository
 2. Copy it to your Illustrator Scripts folder:
    - **macOS**: `/Applications/Adobe Illustrator [Version]/Presets/[Language]/Scripts/`
    - **Windows**: `C:\Program Files\Adobe\Adobe Illustrator [Version]\Presets\en_US\Scripts\`
 
 ### Method 2: Run from Any Location
 
-1. Download the `GenAI Cache Cleaner 1.2.jsx` file
+1. Download the `GenAI Cache Cleaner 1.3.jsx` file
 2. In Illustrator, go to **File > Scripts > Other Script...**
 3. Navigate to the downloaded file and select it
 
@@ -55,26 +56,27 @@ The script manages cache folders for the following Adobe Illustrator Generative 
 
 1. **From the Scripts Menu** (if installed):
    - Open Adobe Illustrator
-   - Go to **File > Scripts > GenAI Cache Cleaner 1.2**
+   - Go to **File > Scripts > GenAI Cache Cleaner 1.3**
 
 2. **From File Browser**:
    - Open Adobe Illustrator
    - Go to **File > Scripts > Other Script...**
-   - Select the `GenAI Cache Cleaner 1.2.jsx` file
+   - Select the `GenAI Cache Cleaner 1.3.jsx` file
 
 ### Using the Interface
 ![GenAI Cache Cleaner UI](GenAI.png).
 The script will open a dialog window displaying:
 
 1. **Preferences Path**: Shows the location of your Illustrator preferences folder
-2. **Cache Folders List**: Each GenAI cache folder with:
+2. **Check All Folders**: Master checkbox to select/deselect all cache folders at once
+3. **Cache Folders List**: Each GenAI cache folder with:
    - Folder name
    - Number of items (in parentheses)
    - Total size in MB
    - Checkbox for selection
    - Clickable name to open folder in file explorer
-3. **Total Size**: Sum of all GenAI cache folders
-4. **Action Buttons**:
+4. **Total Size**: Sum of all GenAI cache folders
+5. **Action Buttons**:
    - **Delete Selected**: Remove checked cache folders
    - **Open Prefs**: Open the preferences folder in file explorer
    - **Close**: Exit the script
@@ -170,7 +172,11 @@ A: Yes, these are temporary cache files.
 
 ## Version History
 
-### Version 1.2 (Current)
+### Version 1.3 (Current)
+- Added "Check All Folders" checkbox for quick selection/deselection of all cache folders
+- Improved user workflow for bulk operations
+
+### Version 1.2
 - Enhanced version detection using major.minor format
 - Improved support for Beta and Prerelease channels
 - Better cross-platform folder detection
