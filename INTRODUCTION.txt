@@ -1,0 +1,7 @@
+GenAI Cache Cleaner - Quick Introduction
+
+Adobe Illustrator's Generative AI features create cache files that can accumulate gigabytes of data over time. This simple script helps you locate and delete these cache folders to free up valuable disk space.
+
+With an easy-to-use interface, you can see all GenAI cache folders, their sizes, and selectively delete them—or use the "Check All" option to clean everything at once. Safe, fast, and works on both Mac and Windows.
+
+Install it once, run it whenever you need space. No restart required.
