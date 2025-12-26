@@ -298,7 +298,7 @@
                 }
             }
         }
-        alert("Deletion completed.\n\n" + report.join("\n"));
+        alert("Deletion completed.");
         refresh();
     };
     closeBtn.onClick = function(){ dlg.close(); };
