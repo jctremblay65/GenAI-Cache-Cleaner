@@ -1,232 +1,471 @@
-{\rtf1\ansi\deff0
-{\fonttbl{\f0 Times New Roman;}{\f1 Courier New;}}
-{\colortbl;\red0\green0\blue0;\red0\green0\blue255;}
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica-Bold;\f1\fswiss\fcharset0 Helvetica;\f2\fmodern\fcharset0 CourierNewPSMT;
+\f3\froman\fcharset0 TimesNewRomanPSMT;\f4\froman\fcharset0 TimesNewRomanPS-BoldMT;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\vieww24780\viewh17800\viewkind0
+\deftab720
+\pard\pardeftab720\qc\partightenfactor0
 
-\pard\qc\b\fs48 GenAI Cache Cleaner for Adobe Illustrator\b0\fs24\par
-\par
+\f0\b\fs48 \cf0 GenAI Cache Cleaner for Adobe Illustrator
+\f1\b0\fs24 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf0 An utility script for Adobe Illustrator that helps you manage and clean up GenAI cache folders, freeing up valuable disk space.\
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\fs24 An utility script for Adobe Illustrator that helps you manage and clean up GenAI cache folders, freeing up valuable disk space.\par
-\par
+\f0\b\fs36 \cf0 Overview
+\f1\b0\fs24 \
+\
+GenAI Cache Cleaner is an ExtendScript utility for Adobe Illustrator that automatically locates and allows you to delete cached data from Illustrator's Generative AI features. Over time, these cache folders can accumulate hundreds of megabytes or even gigabytes of data. This script provides an easy-to-use interface to identify, review, and delete these caches safely.\
+\
 
-\pard\b\fs36 Overview\b0\fs24\par
-\par
-GenAI Cache Cleaner is an ExtendScript utility for Adobe Illustrator that automatically locates and allows you to delete cached data from Illustrator's Generative AI features. Over time, these cache folders can accumulate hundreds of megabytes or even gigabytes of data. This script provides an easy-to-use interface to identify, review, and delete these caches safely.\par
-\par
+\f0\b\fs36 Features
+\f1\b0\fs24 \
+\
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 \'95	
+\f0\b Automatic Detection
+\f1\b0 : Automatically locates your Illustrator preferences folder across different versions, channels (Stable/Beta/Prerelease), and platforms (macOS/Windows)\
+\'95	
+\f0\b Visual Overview
+\f1\b0 : Displays all GenAI cache folders with their sizes and item counts at a glance\
+\'95	
+\f0\b Selective Deletion
+\f1\b0 : Choose which cache folders to delete with checkbox selection\
+\'95	
+\f0\b Check All Folders
+\f1\b0 : Quickly select or deselect all cache folders with a single checkbox\
+\'95	
+\f0\b Safety First
+\f1\b0 : Provides detailed confirmation dialogs before any deletion occurs\
+\'95	
+\f0\b Cross-Platform
+\f1\b0 : Works seamlessly on both macOS and Windows\
+\'95	
+\f0\b Version Aware
+\f1\b0 : Automatically detects Illustrator version and adjusts folder paths accordingly\
+\'95	
+\f0\b Quick Navigation
+\f1\b0 : Click on folder names to open them directly in your file explorer\
+\'95	
+\f0\b Real-time Updates
+\f1\b0 : Automatically refreshes folder sizes after deletion\
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs36 Features\b0\fs24\par
-\par
-\pard\fi-360\li720\bullet\tab \b Automatic Detection\b0 : Automatically locates your Illustrator preferences folder across different versions, channels (Stable/Beta/Prerelease), and platforms (macOS/Windows)\par
-\bullet\tab \b Visual Overview\b0 : Displays all GenAI cache folders with their sizes and item counts at a glance\par
-\bullet\tab \b Selective Deletion\b0 : Choose which cache folders to delete with checkbox selection\par
-\bullet\tab \b Check All Folders\b0 : Quickly select or deselect all cache folders with a single checkbox\par
-\bullet\tab \b Safety First\b0 : Provides detailed confirmation dialogs before any deletion occurs\par
-\bullet\tab \b Cross-Platform\b0 : Works seamlessly on both macOS and Windows\par
-\bullet\tab \b Version Aware\b0 : Automatically detects Illustrator version and adjusts folder paths accordingly\par
-\bullet\tab \b Quick Navigation\b0 : Click on folder names to open them directly in your file explorer\par
-\bullet\tab \b Real-time Updates\b0 : Automatically refreshes folder sizes after deletion\par
-\par
+\f0\b\fs36 \cf0 Supported GenAI Features
+\f1\b0\fs24 \
+\
+The script manages cache folders for the following Adobe Illustrator Generative AI features:\
+\
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 \'95	
+\f0\b GenAIImageToCaption
+\f1\b0 : Image-to-caption generation cache\
+\'95	
+\f0\b GenAITextToVectors
+\f1\b0 : Text-to-vector graphics generation cache\
+\'95	
+\f0\b GenAIRotateVector
+\f1\b0 : Vector rotation AI cache\
+\'95	
+\f0\b GenAIRecolor
+\f1\b0 : AI-powered recoloring cache\
+\'95	
+\f0\b GenAIPatterns
+\f1\b0 : Pattern generation cache\
+\'95	
+\f0\b GenAIMultiDiffusion
+\f1\b0 : Multi-diffusion model cache (Generative Expand)\
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs36 Supported GenAI Features\b0\fs24\par
-\par
-The script manages cache folders for the following Adobe Illustrator Generative AI features:\par
-\par
-\pard\fi-360\li720\bullet\tab \b GenAIImageToCaption\b0 : Image-to-caption generation cache\par
-\bullet\tab \b GenAITextToVectors\b0 : Text-to-vector graphics generation cache\par
-\bullet\tab \b GenAIRotateVector\b0 : Vector rotation AI cache\par
-\bullet\tab \b GenAIRecolor\b0 : AI-powered recoloring cache\par
-\bullet\tab \b GenAIPatterns\b0 : Pattern generation cache\par
-\bullet\tab \b GenAIMultiDiffusion\b0 : Multi-diffusion model cache (Generative Expand)\par
-\par
+\f0\b\fs36 \cf0 System Requirements
+\f1\b0\fs24 \
+\
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 \'95	
+\f0\b Adobe Illustrator
+\f1\b0 : Version 2024 or later (any version with GenAI features)\
+\'95	
+\f0\b Operating System
+\f1\b0 : macOS or Windows\
+\'95	
+\f0\b Permissions
+\f1\b0 : Write access to Illustrator preferences folder\
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs36 System Requirements\b0\fs24\par
-\par
-\pard\fi-360\li720\bullet\tab \b Adobe Illustrator\b0 : Version 2024 or later (any version with GenAI features)\par
-\bullet\tab \b Operating System\b0 : macOS or Windows\par
-\bullet\tab \b Permissions\b0 : Write access to Illustrator preferences folder\par
-\par
+\f0\b\fs36 \cf0 Installation
+\f1\b0\fs24 \
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs36 Installation\b0\fs24\par
-\par
-\b\fs28 Method 1: Direct Installation\b0\fs24\par
-\par
-\pard\fi-360\li720 1.\tab Download the \f1 GenAI Cache Cleaner 1.3.jsx\f0  file from this repository\par
-2.\tab Copy it to your Illustrator Scripts folder:\par
-\pard\fi-360\li1080\bullet\tab \b macOS\b0 : \f1 /Applications/Adobe Illustrator [Version]/Presets/[Language]/Scripts/\f0\par
-\bullet\tab \b Windows\b0 : \f1 C:\\Program Files\\Adobe\\Adobe Illustrator [Version]\\Presets\\en_US\\Scripts\\\f0\par
-\par
+\f0\b\fs28 \cf0 Method 1: Direct Installation
+\f1\b0\fs24 \
+\
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 1.	Download the 
+\f2 GenAI Cache Cleaner 1.3.jsx
+\f3  file from this repository\
+2.	Copy it to your Illustrator Scripts folder:\
+\pard\pardeftab720\li1080\fi-360\partightenfactor0
+\cf0 \'95	
+\f4\b macOS
+\f3\b0 : 
+\f2 /Applications/Adobe Illustrator [Version]/Presets/[Language]/Scripts/
+\f3 \
+\'95	
+\f4\b Windows
+\f3\b0 : 
+\f2 C:\\Program Files\\Adobe\\Adobe Illustrator [Version]\\Presets\\en_US\\Scripts\\
+\f3 \
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs28 Method 2: Run from Any Location\b0\fs24\par
-\par
-\pard\fi-360\li720 1.\tab Download the \f1 GenAI Cache Cleaner 1.3.jsx\f0  file\par
-2.\tab In Illustrator, go to \b File > Scripts > Other Script...\b0\par
-3.\tab Navigate to the downloaded file and select it\par
-\par
+\f4\b\fs28 \cf0 Method 2: Run from Any Location
+\f3\b0\fs24 \
+\
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 1.	Download the 
+\f2 GenAI Cache Cleaner 1.3.jsx
+\f3  file\
+2.	In Illustrator, go to 
+\f4\b File > Scripts > Other Script...
+\f3\b0 \
+3.	Navigate to the downloaded file and select it\
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs36 Usage\b0\fs24\par
-\par
-\b\fs28 Running the Script\b0\fs24\par
-\par
-\pard\fi-360\li720 1.\tab \b From the Scripts Menu\b0  (if installed):\par
-\pard\fi-360\li1080\bullet\tab Open Adobe Illustrator\par
-\bullet\tab Go to \b File > Scripts > GenAI Cache Cleaner 1.3\b0\par
-\par
-\pard\fi-360\li720 2.\tab \b From File Browser\b0 :\par
-\pard\fi-360\li1080\bullet\tab Open Adobe Illustrator\par
-\bullet\tab Go to \b File > Scripts > Other Script...\b0\par
-\bullet\tab Select the \f1 GenAI Cache Cleaner 1.3.jsx\f0  file\par
-\par
+\f4\b\fs36 \cf0 Usage
+\f3\b0\fs24 \
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs28 Using the Interface\b0\fs24\par
-\par
-The script will open a dialog window displaying:\par
-\par
-\pard\fi-360\li720 1.\tab \b Preferences Path\b0 : Shows the location of your Illustrator preferences folder\par
-2.\tab \b Check All Folders\b0 : Master checkbox to select/deselect all cache folders at once\par
-3.\tab \b Cache Folders List\b0 : Each GenAI cache folder with:\par
-\pard\fi-360\li1080\bullet\tab Folder name\par
-\bullet\tab Number of items (in parentheses)\par
-\bullet\tab Total size in MB\par
-\bullet\tab Checkbox for selection\par
-\bullet\tab Clickable name to open folder in file explorer\par
-\pard\fi-360\li720 4.\tab \b Total Size\b0 : Sum of all GenAI cache folders\par
-5.\tab \b Action Buttons\b0 :\par
-\pard\fi-360\li1080\bullet\tab \b Delete Selected\b0 : Remove checked cache folders\par
-\bullet\tab \b Open Prefs\b0 : Open the preferences folder in file explorer\par
-\bullet\tab \b Close\b0 : Exit the script\par
-\par
+\f4\b\fs28 \cf0 Running the Script
+\f3\b0\fs24 \
+\
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 1.	
+\f4\b From the Scripts Menu
+\f3\b0  (if installed):\
+\pard\pardeftab720\li1080\fi-360\partightenfactor0
+\cf0 \'95	Open Adobe Illustrator\
+\'95	Go to 
+\f4\b File > Scripts > GenAI Cache Cleaner 1.3
+\f3\b0 \
+\
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 2.	
+\f4\b From File Browser
+\f3\b0 :\
+\pard\pardeftab720\li1080\fi-360\partightenfactor0
+\cf0 \'95	Open Adobe Illustrator\
+\'95	Go to 
+\f4\b File > Scripts > Other Script...
+\f3\b0 \
+\'95	Select the 
+\f2 GenAI Cache Cleaner 1.3.jsx
+\f3  file\
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs28 Step-by-Step Cleanup\b0\fs24\par
-\par
-\pard\fi-360\li720 1.\tab \b Review\b0 : Examine the list of cache folders and their sizes\par
-2.\tab \b Select\b0 : Check the boxes next to folders you want to delete\par
-3.\tab \b Confirm\b0 : Click "Delete Selected"\par
-4.\tab \b Verify\b0 : Review the confirmation dialog showing what will be deleted\par
-5.\tab \b Executez\b0 : Confirm to proceed with deletion\par
-6.\tab \b Results\b0 : View the deletion report showing files and folders removed\par
-\par
+\f4\b\fs28 \cf0 Using the Interface
+\f3\b0\fs24 \
+\
+The script will open a dialog window displaying:\
+\
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 1.	
+\f4\b Preferences Path
+\f3\b0 : Shows the location of your Illustrator preferences folder\
+2.	
+\f4\b Check All Folders
+\f3\b0 : Master checkbox to select/deselect all cache folders at once\
+3.	
+\f4\b Cache Folders List
+\f3\b0 : Each GenAI cache folder with:\
+\pard\pardeftab720\li1080\fi-360\partightenfactor0
+\cf0 \'95	Folder name\
+\'95	Number of items (in parentheses)\
+\'95	Total size in MB\
+\'95	Checkbox for selection\
+\'95	Clickable name to open folder in file explorer\
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 4.	
+\f4\b Total Size
+\f3\b0 : Sum of all GenAI cache folders\
+5.	
+\f4\b Action Buttons
+\f3\b0 :\
+\pard\pardeftab720\li1080\fi-360\partightenfactor0
+\cf0 \'95	
+\f4\b Delete Selected
+\f3\b0 : Remove checked cache folders\
+\'95	
+\f4\b Open Prefs
+\f3\b0 : Open the preferences folder in file explorer\
+\'95	
+\f4\b Close
+\f3\b0 : Exit the script\
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs36 Understanding the Display\b0\fs24\par
-\par
-\f1 GenAITextToVectors (45) 234.5 MB\f0\par
-\par
-\pard\fi-360\li720\bullet\tab \f1 GenAITextToVectors\f0 : Cache folder name\par
-\bullet\tab \f1 (45)\f0 : Number of subfolders/items\par
-\bullet\tab \f1 234.5 MB\f0 : Total size on disk\par
-\par
-\pard Grayed out entries indicate empty or non-existent folders.\par
-\par
+\f4\b\fs28 \cf0 Step-by-Step Cleanup
+\f3\b0\fs24 \
+\
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 1.	
+\f4\b Review
+\f3\b0 : Examine the list of cache folders and their sizes\
+2.	
+\f4\b Select
+\f3\b0 : Check the boxes next to folders you want to delete\
+3.	
+\f4\b Confirm
+\f3\b0 : Click "Delete Selected"\
+4.	
+\f4\b Verify
+\f3\b0 : Review the confirmation dialog showing what will be deleted\
+5.	
+\f4\b Executez
+\f3\b0 : Confirm to proceed with deletion\
+6.	
+\f4\b Results
+\f3\b0 : View the deletion report showing files and folders removed\
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs36 How It Works\b0\fs24\par
-\par
-\b\fs28 Folder Detection\b0\fs24\par
-\par
-The script uses a sophisticated multi-step approach to locate your Illustrator preferences:\par
-\par
-\pard\fi-360\li720 1.\tab \b Version Detection\b0 : Extracts major.minor version from \f1 app.version\f0  (e.g., "30.1")\par
-2.\tab \b Channel Detection\b0 : Identifies if running Stable, Beta, or Prerelease build\par
-3.\tab \b Path Construction\b0 : Tries multiple naming patterns:\par
-\pard\fi-360\li1080\bullet\tab \f1 Adobe Illustrator 30.1 Settings\f0\par
-\bullet\tab \f1 Adobe Illustrator 30.1 Beta Settings\f0\par
-\bullet\tab \f1 Adobe Illustrator 30.1 Prerelease Settings\f0\par
-\pard\fi-360\li720 4.\tab \b Locale Support\b0 : Checks for locale-specific folders (en_US, en_GB, etc.)\par
-5.\tab \b Platform-Specific Paths\b0 :\par
-\pard\fi-360\li1080\bullet\tab \b macOS\b0 : \f1 ~/Library/Preferences/Adobe Illustrator [version] Settings/\f0\par
-\bullet\tab \b Windows\b0 : \f1 %APPDATA%\\Adobe\\Adobe Illustrator [version] Settings\\\f0\par
-\par
+\f4\b\fs36 \cf0 Understanding the Display
+\f3\b0\fs24 \
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs28 Safe Deletion\b0\fs24\par
-\par
-The script implements recursive deletion with error handling:\par
-\par
-\pard\fi-360\li720\bullet\tab Traverses all subfolders and files\par
-\bullet\tab Attempts to delete files before folders\par
-\bullet\tab Tracks success/failure for each operation\par
-\bullet\tab Reports detailed results including any errors\par
-\bullet\tab Preserves preferences folder structure\par
-\par
+\f2 \cf0 GenAITextToVectors (45) 234.5 MB
+\f3 \
+\
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 \'95	
+\f2 GenAITextToVectors
+\f3 : Cache folder name\
+\'95	
+\f2 (45)
+\f3 : Number of subfolders/items\
+\'95	
+\f2 234.5 MB
+\f3 : Total size on disk\
+\
+\pard\pardeftab720\partightenfactor0
+\cf0 Grayed out entries indicate empty or non-existent folders.\
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs36 Troubleshooting\b0\fs24\par
-\par
-\b\fs28 Cache Folders Reappear\b0\fs24\par
-\par
-This is normal behavior. Illustrator recreates cache folders as you use GenAI features. Run the cleaner periodically to manage disk space.\par
-\par
+\f4\b\fs36 \cf0 How It Works
+\f3\b0\fs24 \
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs36 Technical Details\b0\fs24\par
-\par
-\b\fs28 File Format\b0\fs24\par
-\pard\fi-360\li720\bullet\tab \b Language\b0 : ExtendScript (Adobe's extended JavaScript)\par
-\bullet\tab \b Compatibility\b0 : Illustrator CC 2024 and later\par
-\par
+\f4\b\fs28 \cf0 Folder Detection
+\f3\b0\fs24 \
+\
+The script uses a sophisticated multi-step approach to locate your Illustrator preferences:\
+\
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 1.	
+\f4\b Version Detection
+\f3\b0 : Extracts major.minor version from 
+\f2 app.version
+\f3  (e.g., "30.1")\
+2.	
+\f4\b Channel Detection
+\f3\b0 : Identifies if running Stable, Beta, or Prerelease build\
+3.	
+\f4\b Path Construction
+\f3\b0 : Tries multiple naming patterns:\
+\pard\pardeftab720\li1080\fi-360\partightenfactor0
+\cf0 \'95	
+\f2 Adobe Illustrator 30.1 Settings
+\f3 \
+\'95	
+\f2 Adobe Illustrator 30.1 Beta Settings
+\f3 \
+\'95	
+\f2 Adobe Illustrator 30.1 Prerelease Settings
+\f3 \
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 4.	
+\f4\b Locale Support
+\f3\b0 : Checks for locale-specific folders (en_US, en_GB, etc.)\
+5.	
+\f4\b Platform-Specific Paths
+\f3\b0 :\
+\pard\pardeftab720\li1080\fi-360\partightenfactor0
+\cf0 \'95	
+\f4\b macOS
+\f3\b0 : 
+\f2 ~/Library/Preferences/Adobe Illustrator [version] Settings/
+\f3 \
+\'95	
+\f4\b Windows
+\f3\b0 : 
+\f2 %APPDATA%\\Adobe\\Adobe Illustrator [version] Settings\\
+\f3 \
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs28 Cache Folder Locations\b0\fs24\par
-\par
-\b macOS:\b0\par
-\f1 ~/Library/Preferences/Adobe Illustrator [version] Settings/[locale]/GenAI*/\f0\par
-\par
-\b Windows:\b0\par
-\f1 %APPDATA%\\Adobe\\Adobe Illustrator [version] Settings\\[locale]\\GenAI*\\\f0\par
-\par
+\f4\b\fs28 \cf0 Safe Deletion
+\f3\b0\fs24 \
+\
+The script implements recursive deletion with error handling:\
+\
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 \'95	Traverses all subfolders and files\
+\'95	Attempts to delete files before folders\
+\'95	Tracks success/failure for each operation\
+\'95	Reports detailed results including any errors\
+\'95	Preserves preferences folder structure\
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs36 FAQ\b0\fs24\par
-\par
-\b Q: Will this delete my Illustrator settings or preferences?\b0\par
-A: No, it only deletes GenAI cache folders. Your artboards, swatches, brushes, and other preferences remain untouched.\par
-\par
-\b Q: Do I need to restart Illustrator after cleaning?\b0\par
-A: No.\par
-\par
-\b Q: How much space can I expect to free up?\b0\par
-A: Varies by usage. Heavy GenAI users may free 500MB-2GB or more.\par
-\par
-\b Q: Can I run this on multiple Illustrator versions?\b0\par
-A: Yes, run the script from each version to clean its specific caches.\par
-\par
-\b Q: Is it safe to delete all cache folders?\b0\par
-A: Yes, these are temporary cache files.\par
-\par
+\f4\b\fs36 \cf0 Troubleshooting
+\f3\b0\fs24 \
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs36 Version History\b0\fs24\par
-\par
-\b\fs28 Version 1.3 (Current)\b0\fs24\par
-\pard\fi-360\li720\bullet\tab Added "Check All Folders" checkbox for quick selection/deselection of all cache folders\par
-\bullet\tab Improved user workflow for bulk operations\par
-\par
+\f4\b\fs28 \cf0 Cache Folders Reappear
+\f3\b0\fs24 \
+\
+This is normal behavior. Illustrator recreates cache folders as you use GenAI features. Run the cleaner periodically to manage disk space.\
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs28 Version 1.2\b0\fs24\par
-\pard\fi-360\li720\bullet\tab Enhanced version detection using major.minor format\par
-\bullet\tab Improved support for Beta and Prerelease channels\par
-\bullet\tab Better cross-platform folder detection\par
-\bullet\tab Optimized UI with clickable folder names\par
-\bullet\tab Improved error handling and reporting\par
-\par
+\f4\b\fs36 \cf0 Technical Details
+\f3\b0\fs24 \
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs28 Version 1.1\b0\fs24\par
-\pard\fi-360\li720\bullet\tab Added multi-locale support\par
-\bullet\tab Enhanced folder statistics\par
-\bullet\tab Improved deletion confirmation dialog\par
-\par
+\f4\b\fs28 \cf0 File Format
+\f3\b0\fs24 \
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 \'95	
+\f4\b Language
+\f3\b0 : ExtendScript (Adobe's extended JavaScript)\
+\'95	
+\f4\b Compatibility
+\f3\b0 : Illustrator CC 2024 and later\
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs28 Version 1.0\b0\fs24\par
-\pard\fi-360\li720\bullet\tab Initial release\par
-\bullet\tab Basic cache detection and deletion\par
-\bullet\tab Simple UI interface\par
-\par
+\f4\b\fs28 \cf0 Cache Folder Locations
+\f3\b0\fs24 \
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs36 Author\b0\fs24\par
-\par
-Created by jctremblay65 (https://github.com/jctremblay65)\par
-Jean-Claude Tremblay - Services Proficiografik\par
-\par
+\f4\b \cf0 macOS:
+\f3\b0 \
+\pard\pardeftab720\partightenfactor0
 
-\pard\b\fs36 Disclaimer\b0\fs24\par
-\par
-This script is provided as-is without warranty. While designed to be safe, always ensure you have backups of important data. The author is not responsible for any data loss or issues arising from the use of this script.\par
-\par
-\pard\qc _______________________________________________\par
-\par
+\f2 \cf0 ~/Library/Preferences/Adobe Illustrator [version] Settings/[locale]/GenAI*/
+\f3 \
+\
+\pard\pardeftab720\partightenfactor0
 
-\pard\b Need Help?\b0  Open an issue on GitHub: https://github.com/jctremblay65/GenAI-Cache-Cleaner/issues\par
-\par
-\b Like this tool?\b0  Give it a star on GitHub!\par
+\f4\b \cf0 Windows:
+\f3\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\f2 \cf0 %APPDATA%\\Adobe\\Adobe Illustrator [version] Settings\\[locale]\\GenAI*\\
+\f3 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f4\b\fs36 \cf0 FAQ
+\f3\b0\fs24 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f4\b \cf0 Q: Will this delete my Illustrator settings or preferences?
+\f3\b0 \
+A: No, it only deletes GenAI cache folders. Your artboards, swatches, brushes, and other preferences remain untouched.\
+\
+
+\f4\b Q: Do I need to restart Illustrator after cleaning?
+\f3\b0 \
+A: No.\
+\
+
+\f4\b Q: How much space can I expect to free up?
+\f3\b0 \
+A: Varies by usage. Heavy GenAI users may free 500MB-2GB or more.\
+\
+
+\f4\b Q: Can I run this on multiple Illustrator versions?
+\f3\b0 \
+A: Yes, run the script from each version to clean its specific caches.\
+\
+
+\f4\b Q: Is it safe to delete all cache folders?
+\f3\b0 \
+A: Yes, these are temporary cache files.\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f4\b\fs36 \cf0 Version History
+\f3\b0\fs24 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f4\b\fs28 \cf0 Version 1.3 (Current)
+\f3\b0\fs24 \
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 \'95	Added "Check All Folders" checkbox for quick selection/deselection of all cache folders\
+\'95	Improved user workflow for bulk operations\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f4\b\fs28 \cf0 Version 1.2
+\f3\b0\fs24 \
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 \'95	Enhanced version detection using major.minor format\
+\'95	Improved support for Beta and Prerelease channels\
+\'95	Better cross-platform folder detection\
+\'95	Optimized UI with clickable folder names\
+\'95	Improved error handling and reporting\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f4\b\fs28 \cf0 Version 1.1
+\f3\b0\fs24 \
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 \'95	Added multi-locale support\
+\'95	Enhanced folder statistics\
+\'95	Improved deletion confirmation dialog\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f4\b\fs28 \cf0 Version 1.0
+\f3\b0\fs24 \
+\pard\pardeftab720\li720\fi-360\partightenfactor0
+\cf0 \'95	Initial release\
+\'95	Basic cache detection and deletion\
+\'95	Simple UI interface\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f4\b\fs36 \cf0 Author
+\f3\b0\fs24 \
+\
+Created by jctremblay65 (https://github.com/jctremblay65)\
+Jean-Claude Tremblay - Services Proficiografik\
+\
+
+\f4\b\fs36 Disclaimer
+\f3\b0\fs24 \
+\
+This script is provided as-is without warranty. While designed to be safe, always ensure you have backups of important data. The author is not responsible for any data loss or issues arising from the use of this script.\
+\
+\pard\pardeftab720\qc\partightenfactor0
+\cf0 _______________________________________________\
 }
