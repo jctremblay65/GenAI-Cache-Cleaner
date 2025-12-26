@@ -1,21 +1,12 @@
 (function () {
-    // -------- Helpers --------
-    // Parse app.name to extract base name and any channel keywords (Beta/Prerelease)
     function getAppChannelInfo() {
-        // Examples of app.name:
-        // "Adobe Illustrator 2026"
-        // "Adobe Illustrator 2026 Prerelease"
-        // "Adobe Illustrator 2026 Beta"
         var name = app.name || "";
         var lower = name.toLowerCase();
         var isBeta = lower.indexOf("beta") > -1;
         var isPrerelease = (!isBeta) && (lower.indexOf("pre") > -1 || lower.indexOf("prerelease") > -1);
-        // Base product label (keep official casing)
-        // We'll normalize to "Adobe Illustrator" for folder name generation
         var baseLabel = "Adobe Illustrator";
         return { isBeta: isBeta, isPrerelease: isPrerelease, baseLabel: baseLabel };
     }
-    // Extract version parts (e.g., "30.1.36" -> {major:"30", minor:"1", patch:"36", majorMinor:"30.1", full:"30.1.36"})
     function getVersionParts() {
         var v = app.version;
         var parts = v.split(".");
@@ -40,13 +31,6 @@
         }
         return major;
     }
-    // Try multiple candidate preference folder names and locales (regular, Beta/Prerelease, and Windows x64)
-    // Rule: Use only first two version numbers (major.minor), optionally with or without "Beta" or "Prerelease" before "Settings".
-    // Examples:
-    // - "Adobe Illustrator 30.1 Settings"
-    // - "Adobe Illustrator 30.1 Beta Settings"
-    // - "Adobe Illustrator 30.1 Prerelease Settings"
-    // Also include some safe fallbacks.
     function resolvePrefsFolder() {
         var isMac = (File.fs == "Macintosh");
         var isWin = (File.fs == "Windows");
@@ -56,21 +40,16 @@
         var locale = app.locale ? app.locale : "en_US";
         var baseLabel = appInfo.baseLabel;
         var twoPart = ver.major + "." + ver.minor;
-        // Build name variants prioritizing 2-part versions with channel aligned to running app
         var nameVariants = [];
-        // Channel-aware top candidates (two-part)
         if (appInfo.isBeta) {
             nameVariants.push(baseLabel + " " + twoPart + " Beta Settings");
         }
         if (appInfo.isPrerelease) {
             nameVariants.push(baseLabel + " " + twoPart + " Prerelease Settings");
         }
-        // Non-channel (stable)
         nameVariants.push(baseLabel + " " + twoPart + " Settings");
-        // Accept either channel regardless of running build, in case naming differs on disk
         nameVariants.push(baseLabel + " " + twoPart + " Beta Settings");
         nameVariants.push(baseLabel + " " + twoPart + " Prerelease Settings");
-        // A few pragmatic fallbacks (full and major-only, with/without channel)
         var full = ver.full;
         nameVariants.push(baseLabel + " " + full + " Settings");
         nameVariants.push(baseLabel + " " + full + " Beta Settings");
@@ -81,7 +60,6 @@
         nameVariants.push(baseLabel + " " + majorOnly + " Settings");
         nameVariants.push(baseLabel + " " + majorOnly + " Beta Settings");
         nameVariants.push(baseLabel + " " + majorOnly + " Prerelease Settings");
-        // Remove duplicates manually (ExtendScript has no Set)
         var dedup = [];
         for (var di = 0; di < nameVariants.length; di++) {
             var cand = nameVariants[di];
@@ -111,13 +89,12 @@
             }
         } else if (isWin) {
             var appdata = $.getenv("APPDATA");
-            var base = appdata && appdata.length > 0 ? appdata : Folder.userData.parent.fsName; // Roaming
+            var base = appdata && appdata.length > 0 ? appdata : Folder.userData.parent.fsName;
             var adobeRoot = new Folder(base + "\\Adobe");
             for (var i2 = 0; i2 < nameVariants.length; i2++) {
                 var cand2 = new Folder(adobeRoot.fsName + "\\" + nameVariants[i2]);
                 var hit2 = tryLocales(cand2);
                 if (hit2) {
-                    // Prefer locale root; x64 subfolder may exist under it
                     return hit2;
                 }
             }
@@ -157,7 +134,6 @@
         if (r < 0.1) r = 0.1;
         return r + " MB";
     }
-    // Recursive delete that attempts to remove all children before removing the folder itself
     function deleteFolderRecursive(fld) {
         var result = { ok: true, deletedFiles: 0, deletedFolders: 0, errors: [] };
         if (!fld || !fld.exists) return result;
@@ -174,7 +150,6 @@
                         if (sub.errors.length > 0) {
                             for (var e = 0; e < sub.errors.length; e++) result.errors.push(sub.errors[e]);
                         }
-                        // Folder already removed by recursive call, no need to remove again
                     } else if (it instanceof File) {
                         if (it.exists) {
                             if (!it.remove()) {
@@ -204,7 +179,6 @@
         }
         return result;
     }
-    // -------- Data --------
     var prefs = resolvePrefsFolder();
     if (!prefs) { alert("Could not locate the Illustrator Preferences folder using 2-part version naming (with/without Beta/Prerelease)."); return; }
     var targetNames = ["GenAIImageToCaption","GenAITextToVectors", "GenAIRotateVector", "GenAIRecolor", "GenAIPatterns", "GenAIMultiDiffusion"];
@@ -213,7 +187,6 @@
         var f = getGenAIFolder(prefs, targetNames[i]);
         entries.push({ name: targetNames[i], folder: f, present: f.exists, stats: {bytes:0, subCount:0, fileCount:0}, bullet: null, label: null, checkbox: null });
     }
-    // -------- UI --------
     var ver = getVersionParts();
     var dlg = new Window("dialog", "GenAI Cache Cleaner 1.3 - Illustrator " + ver.majorMinor);
     dlg.orientation = "column"; dlg.alignChildren = ["fill","top"]; dlg.margins = 24; dlg.spacing = 12;
@@ -223,7 +196,6 @@
     var selHint = listHeader.add("statictext", undefined, "Click names to open. Check to delete.");
     selHint.characters = 48;
 
-    // Add "Check All Folders" checkbox
     var checkAllGroup = dlg.add("group");
     checkAllGroup.orientation = "row";
     checkAllGroup.alignChildren = ["left","center"];
@@ -257,7 +229,6 @@
     openPrefsBtn.preferredSize = [120,32];
     var closeBtn = footer.add("button", undefined, "Close");
     closeBtn.preferredSize = [100,32];
-    // -------- Render --------
     function refresh() {
         var grandTotal = 0;
         for (var i = 0; i < entries.length; i++) {
@@ -276,8 +247,6 @@
         totalText.text = "Total size across all GenAI folders: " + formatSize(grandTotal);
     }
     refresh();
-    // -------- Events --------
-    // Check All Folders functionality
     checkAllCheckbox.onClick = function() {
         var checkState = checkAllCheckbox.value;
         for (var i = 0; i < entries.length; i++) {
